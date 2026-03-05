@@ -72,10 +72,10 @@ func (a *ClineAuthenticator) Login(ctx context.Context, cfg *config.Config, opts
 
 	if refreshToken == "" && opts.Prompt != nil {
 		fmt.Println("\nTo authenticate with Cline:")
-		fmt.Println("1. Open VS Code with Cline extension installed")
-		fmt.Println("2. Press Ctrl+Shift+P (Cmd+Shift+P on Mac)")
-		fmt.Println("3. Run command: 'Cline: Export Auth Token'")
-		fmt.Println("4. The refresh token will be copied to your clipboard")
+		fmt.Println("1. Ensure you have the Cline extension installed and are logged in to VS Code.")
+		fmt.Println("2. Run the included helper script to extract your refresh token:")
+		fmt.Println("   $ ./scripts/get-cline-token.sh")
+		fmt.Println("3. Copy the output and paste it below.")
 		fmt.Println()
 
 		var err error
