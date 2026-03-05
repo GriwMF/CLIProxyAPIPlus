@@ -91,6 +91,7 @@ func main() {
 	var kiroIDCStartURL string
 	var kiroIDCRegion string
 	var kiroIDCFlow string
+	var clineLogin bool
 	var githubCopilotLogin bool
 	var projectID string
 	var vertexImport string
@@ -125,6 +126,7 @@ func main() {
 	flag.StringVar(&kiroIDCStartURL, "kiro-idc-start-url", "", "IDC start URL (required with --kiro-idc-login)")
 	flag.StringVar(&kiroIDCRegion, "kiro-idc-region", "", "IDC region (default: us-east-1)")
 	flag.StringVar(&kiroIDCFlow, "kiro-idc-flow", "", "IDC flow type: authcode (default) or device")
+	flag.BoolVar(&clineLogin, "cline-login", false, "Login to Cline using refresh token from VSCode extension")
 	flag.BoolVar(&githubCopilotLogin, "github-copilot-login", false, "Login to GitHub Copilot using device flow")
 	flag.StringVar(&projectID, "project_id", "", "Project ID (Gemini only, not required)")
 	flag.StringVar(&configPath, "config", DefaultConfigPath, "Configure File Path")
@@ -526,6 +528,8 @@ func main() {
 		cmd.DoIFlowLogin(cfg, options)
 	} else if iflowCookie {
 		cmd.DoIFlowCookieAuth(cfg, options)
+	} else if clineLogin {
+		cmd.DoClineLogin(cfg, options)
 	} else if kimiLogin {
 		cmd.DoKimiLogin(cfg, options)
 	} else if kiroLogin {
@@ -643,15 +647,15 @@ func main() {
 				}
 			}
 		} else {
-      // Start the main proxy service
-      managementasset.StartAutoUpdater(context.Background(), configFilePath)
+			// Start the main proxy service
+			managementasset.StartAutoUpdater(context.Background(), configFilePath)
 
-      if cfg.AuthDir != "" {
-        kiro.InitializeAndStart(cfg.AuthDir, cfg)
-        defer kiro.StopGlobalRefreshManager()
-      }
+			if cfg.AuthDir != "" {
+				kiro.InitializeAndStart(cfg.AuthDir, cfg)
+				defer kiro.StopGlobalRefreshManager()
+			}
 
-      cmd.StartService(cfg, configFilePath, password)
+			cmd.StartService(cfg, configFilePath, password)
 		}
 	}
 }

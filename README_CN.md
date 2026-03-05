@@ -18,6 +18,20 @@ GLM CODING PLAN 是专为AI编码打造的订阅套餐，每月最低仅需20元
 
 智谱AI为本产品提供了特别优惠，使用以下链接购买可以享受九折优惠：https://www.bigmodel.cn/claude-code?ic=RRVJPB5SII
 
+## Cline 认证
+
+您可以通过 CLIProxyAPIPlus 使用您的 Cline 凭据来访问免费和高级模型。
+
+1. 确保您已安装 [Cline VSCode 插件](https://marketplace.visualstudio.com/items?itemName=saoudrizwan.claude-dev) 并已登录。
+2. 运行辅助脚本来提取您的刷新令牌：
+   ```bash
+   ./get-cline-token.sh
+   ```
+3. 运行 CLIProxyAPI 登录命令，并在提示时粘贴令牌：
+   ```bash
+   ./CLIProxyAPI --cline-login
+   ```
+
 ### 命令行登录
 
 > **注意：** 由于 AWS Cognito 限制，Google/GitHub 登录不可用于第三方应用。

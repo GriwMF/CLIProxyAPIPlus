@@ -22,6 +22,7 @@ import (
 //   - kimi
 //   - kiro
 //   - kilo
+//   - cline
 //   - github-copilot
 //   - kiro
 //   - amazonq
@@ -53,6 +54,8 @@ func GetStaticModelDefinitionsByChannel(channel string) []*ModelInfo {
 		return GetKiroModels()
 	case "kilo":
 		return GetKiloModels()
+	case "cline":
+		return GetClineModels()
 	case "amazonq":
 		return GetAmazonQModels()
 	case "antigravity":
@@ -103,6 +106,7 @@ func LookupStaticModelInfo(modelID string) *ModelInfo {
 		GetGitHubCopilotModels(),
 		GetKiroModels(),
 		GetKiloModels(),
+		GetClineModels(),
 		GetAmazonQModels(),
 	}
 	for _, models := range allModels {

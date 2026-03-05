@@ -16,6 +16,20 @@ The Plus release stays in lockstep with the mainline features.
 
 GLM CODING PLAN is a subscription service designed for AI coding, starting at just $10/month. It provides access to their flagship GLM-4.7 & （GLM-5 Only Available  for Pro Users）model across 10+ popular AI coding tools (Claude Code, Cline, Roo Code, etc.), offering developers top-tier, fast, and stable coding experiences.
 
+## Cline Authentication
+
+You can use your Cline credentials to access free and premium models through CLIProxyAPIPlus.
+
+1. Ensure you have the [Cline VSCode extension](https://marketplace.visualstudio.com/items?itemName=saoudrizwan.claude-dev) installed and are logged in.
+2. Run the helper script to extract your refresh token:
+   ```bash
+   ./get-cline-token.sh
+   ```
+3. Run the CLIProxyAPI login command, and paste the token when prompted:
+   ```bash
+   ./CLIProxyAPI --cline-login
+   ```
+
 ## Kiro Authentication
 
 ### CLI Login
