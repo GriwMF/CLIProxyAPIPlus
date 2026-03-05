@@ -442,6 +442,8 @@ func (s *Service) ensureExecutorsForAuthWithMode(a *coreauth.Auth, forceReplace 
 		s.coreManager.RegisterExecutor(executor.NewKiloExecutor(s.cfg))
 	case "cursor":
 		s.coreManager.RegisterExecutor(executor.NewCursorExecutor(s.cfg))
+	case "cline":
+		s.coreManager.RegisterExecutor(executor.NewClineExecutor(s.cfg))
 	case "github-copilot":
 		s.coreManager.RegisterExecutor(executor.NewGitHubCopilotExecutor(s.cfg))
 	case "codebuddy":
@@ -963,11 +965,14 @@ func (s *Service) registerModelsForAuth(a *coreauth.Auth) {
 	case "kimi":
 		models = registry.GetKimiModels()
 		models = applyExcludedModels(models, excluded)
+<<<<<<< HEAD
 	case "cursor":
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 		defer cancel()
 		models = executor.FetchCursorModels(ctx, a, s.cfg)
 		models = applyExcludedModels(models, excluded)
+=======
+>>>>>>> ad9f6e44 (Added test cline login)
 	case "github-copilot":
 		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 		defer cancel()
@@ -979,11 +984,16 @@ func (s *Service) registerModelsForAuth(a *coreauth.Auth) {
 	case "kilo":
 		models = executor.FetchKiloModels(context.Background(), a, s.cfg)
 		models = applyExcludedModels(models, excluded)
+<<<<<<< HEAD
 	case "gitlab":
 		models = executor.GitLabModelsFromAuth(a)
 		models = applyExcludedModels(models, excluded)
 	case "codebuddy":
 		models = registry.GetCodeBuddyModels()
+=======
+	case "cline":
+		models = registry.GetClineModels()
+>>>>>>> ad9f6e44 (Added test cline login)
 		models = applyExcludedModels(models, excluded)
 	default:
 		// Handle OpenAI-compatibility providers by name using config
