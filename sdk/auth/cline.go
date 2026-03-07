@@ -1,9 +1,9 @@
 /**
  * @file SDK authenticator for Cline provider
- * @description Implements the Authenticator interface for Cline authentication. Unlike traditional
- * OAuth flows with browser-based authorization, Cline uses a simpler approach where users export
- * a refresh token from the VSCode extension and provide it directly. This authenticator handles
- * the token exchange and storage process.
+ * @description Implements the Authenticator interface for Cline authentication.
+ * Supports two authentication modes:
+ *   1. OAuth (ClineAuthenticator): Uses a refresh token from the VSCode extension.
+ *   2. API Key (ClineAPIKeyAuthenticator): Uses a Cline API key directly.
  */
 
 package auth
@@ -18,6 +18,10 @@ import (
 	"github.com/router-for-me/CLIProxyAPI/v6/internal/config"
 	coreauth "github.com/router-for-me/CLIProxyAPI/v6/sdk/cliproxy/auth"
 )
+
+// ---------------------------------------------------------------------------
+// ClineAuthenticator — OAuth refresh token flow
+// ---------------------------------------------------------------------------
 
 // ClineAuthenticator implements the authentication flow for Cline accounts.
 // It uses a refresh token obtained from the Cline VSCode extension to generate
@@ -42,17 +46,6 @@ func (a *ClineAuthenticator) RefreshLead() *time.Duration {
 }
 
 // Login performs the Cline authentication flow.
-// This method prompts the user for a refresh token (obtained from VSCode extension),
-// exchanges it for an access token, and stores the credentials.
-//
-// Parameters:
-//   - ctx: The context for the operation
-//   - cfg: The application configuration
-//   - opts: Login options including metadata and prompt function
-//
-// Returns:
-//   - *coreauth.Auth: The authentication record with token storage
-//   - error: An error if authentication fails
 func (a *ClineAuthenticator) Login(ctx context.Context, cfg *config.Config, opts *LoginOptions) (*coreauth.Auth, error) {
 	if cfg == nil {
 		return nil, fmt.Errorf("cliproxy auth: configuration is required")
@@ -74,7 +67,7 @@ func (a *ClineAuthenticator) Login(ctx context.Context, cfg *config.Config, opts
 		fmt.Println("\nTo authenticate with Cline:")
 		fmt.Println("1. Ensure you have the Cline extension installed and are logged in to VS Code.")
 		fmt.Println("2. Run the included helper script to extract your refresh token:")
-		fmt.Println("   $ ./scripts/get-cline-token.sh")
+		fmt.Println("   $ ./get-cline-token.sh")
 		fmt.Println("3. Copy the output and paste it below.")
 		fmt.Println()
 
@@ -138,3 +131,108 @@ func (a *ClineAuthenticator) Login(ctx context.Context, cfg *config.Config, opts
 		Metadata: metadata,
 	}, nil
 }
+
+// ---------------------------------------------------------------------------
+// ClineAPIKeyAuthenticator — direct API key flow
+// ---------------------------------------------------------------------------
+
+// ClineAPIKeyAuthenticator implements the authentication flow for Cline API keys.
+// Unlike the OAuth flow, this simply stores the API key for direct use with the
+// Cline API endpoint (without the workos: prefix).
+type ClineAPIKeyAuthenticator struct{}
+
+// NewClineAPIKeyAuthenticator constructs a Cline API key authenticator.
+func NewClineAPIKeyAuthenticator() *ClineAPIKeyAuthenticator {
+	return &ClineAPIKeyAuthenticator{}
+}
+
+// Provider returns the provider identifier.
+func (a *ClineAPIKeyAuthenticator) Provider() string {
+	return "cline-api"
+}
+
+// RefreshLead returns nil — API keys don't expire and don't need refresh.
+func (a *ClineAPIKeyAuthenticator) RefreshLead() *time.Duration {
+	return nil
+}
+
+// Login prompts the user for a Cline API key and stores it.
+func (a *ClineAPIKeyAuthenticator) Login(ctx context.Context, cfg *config.Config, opts *LoginOptions) (*coreauth.Auth, error) {
+	if cfg == nil {
+		return nil, fmt.Errorf("cliproxy auth: configuration is required")
+	}
+	if opts == nil {
+		opts = &LoginOptions{}
+	}
+
+	apiKey := ""
+	if opts.Metadata != nil {
+		apiKey = opts.Metadata["api_key"]
+	}
+
+	if apiKey == "" && opts.Prompt != nil {
+		fmt.Println("\nTo authenticate with a Cline API key:")
+		fmt.Println("1. Get your API key from https://cline.bot")
+		fmt.Println("2. Paste it below.")
+		fmt.Println()
+
+		var err error
+		apiKey, err = opts.Prompt("Please paste your Cline API key:")
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	apiKey = strings.TrimSpace(apiKey)
+	if apiKey == "" {
+		return nil, fmt.Errorf("API key is required for Cline API key authentication")
+	}
+
+	// Get a label/alias
+	label := ""
+	if opts.Metadata != nil {
+		label = opts.Metadata["alias"]
+	}
+	if label == "" && opts.Prompt != nil {
+		var err error
+		label, err = opts.Prompt("Please input a label or alias for this API key:")
+		if err != nil {
+			return nil, err
+		}
+	}
+	label = strings.TrimSpace(label)
+	if label == "" {
+		return nil, &EmailRequiredError{Prompt: "Please provide a label or alias for the Cline API key."}
+	}
+
+	fileName := fmt.Sprintf("cline-%s.json", label)
+
+	// Store as a simple JSON with api_key and type fields.
+	// The watcher/synthesizer will pick up api_key from Attributes.
+	storage := &cline.ClineTokenStorage{
+		AccessToken: apiKey,
+		Email:       label,
+		Type:        "cline",
+	}
+
+	metadata := map[string]any{
+		"email":    label,
+		"api_key":  apiKey,
+		"auth_kind": "api_key",
+	}
+
+	fmt.Println("Cline API key authentication successful")
+
+	return &coreauth.Auth{
+		ID:       fileName,
+		Provider: "cline", // same provider so the same executor handles it
+		FileName: fileName,
+		Storage:  storage,
+		Metadata: metadata,
+		Attributes: map[string]string{
+			"api_key":   apiKey,
+			"auth_kind": "api_key",
+		},
+	}, nil
+}
+
