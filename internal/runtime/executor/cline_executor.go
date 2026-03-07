@@ -347,8 +347,8 @@ func (e *ClineExecutor) ExecuteStream(ctx context.Context, auth *cliproxyauth.Au
 }
 
 // clineCredentials extracts access token and base URL from auth metadata.
-// For API key auth (api_key attribute), the key is used directly.
-// For OAuth auth (access_token metadata), the "workos:" prefix is added.
+// For API key auth, the key is used directly as Bearer token.
+// For OAuth auth (has refresh_token), the "workos:" prefix is added.
 func clineCredentials(a *cliproxyauth.Auth) (token, baseURL string) {
 	if a == nil {
 		return "", ""
@@ -366,6 +366,13 @@ func clineCredentials(a *cliproxyauth.Auth) (token, baseURL string) {
 	if token == "" && a.Metadata != nil {
 		if v, ok := a.Metadata["access_token"].(string); ok {
 			token = v
+		}
+		// Detect API key vs OAuth: OAuth always has a refresh_token, API keys don't.
+		if !isAPIKey {
+			refreshToken, _ := a.Metadata["refresh_token"].(string)
+			if strings.TrimSpace(refreshToken) == "" {
+				isAPIKey = true
+			}
 		}
 	}
 	// Only add workos: prefix for OAuth tokens, not API keys
