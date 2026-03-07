@@ -95,6 +95,7 @@ func main() {
 	var kiroIDCRegion string
 	var kiroIDCFlow string
 	var clineLogin bool
+	var clineAPILogin bool
 	var githubCopilotLogin bool
 	var codeBuddyLogin bool
 	var projectID string
@@ -135,6 +136,7 @@ func main() {
 	flag.StringVar(&kiroIDCRegion, "kiro-idc-region", "", "IDC region (default: us-east-1)")
 	flag.StringVar(&kiroIDCFlow, "kiro-idc-flow", "", "IDC flow type: authcode (default) or device")
 	flag.BoolVar(&clineLogin, "cline-login", false, "Login to Cline using refresh token from VSCode extension")
+	flag.BoolVar(&clineAPILogin, "cline-api-login", false, "Login to Cline using an API key")
 	flag.BoolVar(&githubCopilotLogin, "github-copilot-login", false, "Login to GitHub Copilot using device flow")
 	flag.BoolVar(&codeBuddyLogin, "codebuddy-login", false, "Login to CodeBuddy using browser OAuth flow")
 	flag.StringVar(&projectID, "project_id", "", "Project ID (Gemini only, not required)")
@@ -550,6 +552,8 @@ func main() {
 		cmd.DoGitLabTokenLogin(cfg, options)
 	} else if clineLogin {
 		cmd.DoClineLogin(cfg, options)
+	} else if clineAPILogin {
+		cmd.DoClineAPILogin(cfg, options)
 	} else if kimiLogin {
 		cmd.DoKimiLogin(cfg, options)
 	} else if cursorLogin {
