@@ -28,5 +28,16 @@ func GetClineModels() []*ModelInfo {
 			ContextLength:       128000,
 			MaxCompletionTokens: 32768,
 		},
+		{
+			ID:                  "z-ai/glm-5.1",
+			Object:              "model",
+			Created:             now,
+			OwnedBy:             "cline",
+			Type:                "cline",
+			DisplayName:         "GLM-5.1 (Free)",
+			Description:         "Z-AI GLM-5.1 via Cline (Free)",
+			ContextLength:       128000,
+			MaxCompletionTokens: 32768,
+		},
 	}
 }
